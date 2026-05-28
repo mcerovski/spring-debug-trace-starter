@@ -1,0 +1,72 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle (in case any sub-project uses it)
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Compiled Java
+*.class
+
+# Logs
+*.log
+logs/
+spring.log
+
+# IDE - IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# IDE - Eclipse / STS
+.project
+.classpath
+.settings/
+.metadata/
+.factorypath
+bin/
+
+# IDE - VS Code
+.vscode/
+
+# IDE - NetBeans
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# OS - macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# OS - Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Local environment / secrets
+.env
+.env.local
+application-local.yml
+application-local.properties
+
+# Misc scratch files
+*.tmp
+*.bak
+*.swp
+*~
