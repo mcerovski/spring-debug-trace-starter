@@ -73,4 +73,7 @@ These come from PRD §6/§14/§17 and shape almost every file:
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
+at [specs/001-v1-starter/plan.md](./specs/001-v1-starter/plan.md). Companion
+artifacts in the same directory: `spec.md`, `research.md`, `data-model.md`,
+`quickstart.md`, and `contracts/{configuration-properties,log-format,public-api}.md`.
 <!-- SPECKIT END -->
