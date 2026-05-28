@@ -69,3 +69,8 @@ These come from PRD §6/§14/§17 and shape almost every file:
 - Error handling → FR-8, §17
 - Visual log format → §8 (example output is the visual contract)
 - "What's in v1?" decisions → §6 (non-goals), §21 (acceptance), §24 (resolved decisions — trust these unless explicitly revisited)
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
