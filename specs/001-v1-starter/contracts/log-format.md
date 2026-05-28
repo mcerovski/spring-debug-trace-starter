@@ -173,6 +173,10 @@ An exception (when `log-exceptions=true`) still emits regardless of duration.
 
 This means that in slow-only mode, log lines may not arrive in real-time order — a slow inner call's lines are buffered until the call returns, then printed all at once when the threshold is crossed. The indent values used are the values that were correct at the moment the calls happened.
 
+**Nesting rule (deferred-emission contract).** Each frame's entry+exit pair is buffered with the depth captured at *call entry* and emitted iff that frame's own elapsed time ≥ `slow-threshold-ms`. Frames are independent: a slow outer call whose inner calls were all fast emits only the outer pair, with its captured depth (e.g. depth 0). The inner pairs are simply absent from the log — there is no synthetic placeholder for them — and the outer's visual chain therefore has gaps where the fast children would have nested. Conversely, a fast outer with a slow inner emits only the inner pair, at the indent value captured when it began (e.g. depth 1), so the resulting line appears two-space-indented with no parent visible. This trades real-time fidelity for a budget-friendly default; adopters who need full chains should disable slow-only mode while debugging the specific call path.
+
+**Overhead note for `method.log-only-slow=true` + `method.log-input=true`.** Buffering the entry line forces argument serialization at call entry on *every* invocation — even ones that turn out to be fast and never emit. `SafeLogSerializer` work is therefore not gated by the slow threshold. This is intentional (we cannot know elapsed time before the call runs) but adopters running `log-only-slow` for production triage should keep `log-input=false` unless argument visibility is essential. The SC-011 budget applies to the default config (`log-input=false`), so this combination is out of the budget's scope.
+
 ---
 
 ## 3. Determinism rules
@@ -256,6 +260,8 @@ Library-internal warnings emit on the same logger at `WARN`:
 
 The leading `[debug-trace WARN]` tag is illustrative — the actual decoration depends on the user's SLF4J pattern. The IMPORTANT contract is: every internal message goes through the same logger as the trace lines (Constitution Principle VII / R11).
 
+**Startup `base-packages` warning.** The third example above is documented behavior: when the library binds `spring-debug-trace.enabled=true` but `spring-debug-trace.base-packages` is empty (or all entries are blank after trimming), the auto-configuration emits the line *exactly once* at startup. The application still starts and no method-chain logs are produced (matching User Story 1 acceptance scenario 3). The warning is for the developer who flipped `enabled=true` and is wondering why nothing appears — it never re-fires per-request.
+
 ---
 
 ## 8. Backward compatibility commitment
@@ -270,4 +276,4 @@ The log format is a documented part of v1's user contract (PRD §15). Once v1.0.
 
 Adding NEW segments to existing lines (e.g., a future `thread=...` segment) is a minor-version compatible change provided existing parsers tolerating ignored tail tokens still work.
 
-Changing to JSON format (PRD §22 future work) is opt-in via the `format` property — the default stays `pretty` for backward compatibility.
+A future JSON format (PRD §22) will be opt-in via a `format` property *introduced at that time*. v1 does NOT expose the `format` property — adding it now would be scaffolding for a non-goal (Constitution Principle III). Adopters who need structured output today should write a Logback / Log4j2 layout that JSON-encodes the dedicated logger's events.

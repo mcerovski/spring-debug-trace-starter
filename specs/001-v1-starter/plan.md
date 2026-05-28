@@ -15,8 +15,8 @@ The technical approach follows `PRD-phases.md` phases 0–8: bootstrap the Maven
 **Language/Version**: Java 17 (baseline source/target). CI verifies on Java 21.
 
 **Primary Dependencies**:
-- Runtime (compile): `spring-boot-starter-aop`, `spring-boot-autoconfigure`, `slf4j-api`, `jackson-databind`.
-- Optional (provided/marked `optional` in pom): `spring-web` — only used when the Servlet API is present on the host classpath.
+- Runtime (compile): `spring-boot-starter-aop`, `spring-boot-autoconfigure`, `slf4j-api`.
+- Optional (`<optional>true</optional>` in pom — not propagated transitively to adopters): `spring-web` (only used when the Servlet API is present on the host classpath), `jackson-databind` (declared so contributors can build against it if a future helper needs it, but v1 does not import it anywhere — honors spec.md §263 Assumption that Jackson is not a hard runtime dependency).
 - Annotation processor: `spring-boot-configuration-processor` for IDE metadata.
 - Test: `spring-boot-starter-test` (brings JUnit Jupiter, AssertJ, Mockito, Spring Test).
 
@@ -150,7 +150,7 @@ LICENSE                    # Phase 8 (Maven Central requirement)
 
 1. **Auto-configuration topology** — one root `DebugTraceAutoConfiguration` containing nested `@Configuration` classes per area, each gated by its own conditions. This keeps the AOP path independent of the Servlet path so method logging works without `spring-web`.
 2. **Aspect activation gate** — `@ConditionalOnProperty(prefix = "spring-debug-trace", name = "enabled", havingValue = "true")` PLUS a runtime guard in `MethodLogMatcher` that returns "no match" when `base-packages` is empty. This makes the "did I forget to set base-packages?" case silent rather than noisy or broken.
-3. **Reflective serializer (no Jackson dependency for traversal)** — clarified in spec.md. Jackson stays on the dependency list only because PRD §12 lists it and it may be useful for the JSON-body masking helper in Phase 6, but the object walk uses pure reflection so DTOs from user code do not need to be Jackson-friendly.
+3. **Reflective serializer (no Jackson dependency for traversal)** — clarified in spec.md. The object walk uses pure reflection so DTOs from user code do not need to be Jackson-friendly. Jackson Databind is declared with `<optional>true</optional>` in `pom.xml` — present at build time for forward-compat but not propagated transitively — honoring spec.md Assumption §263. The Phase 6 JSON-body masking helper uses regex (R5), so v1 has no runtime call into Jackson.
 4. **Exception stack-trace handling** — clarified: `method.log-exception-stack-trace=false` by default; when set, the throwable is passed through SLF4J so the user's appender configuration prints it.
 5. **JSON body masking strategy** — clarified: regex/string substitution on `"<key>"\s*:\s*"..."` patterns. Never a full JSON parse. Operates on the captured-for-logging copy, never on the response delivered to the client.
 6. **Per-call overhead target** — clarified: ≤ 5 % on methods ≥ 1 ms in default config. Sub-ms methods are intentionally out of scope.

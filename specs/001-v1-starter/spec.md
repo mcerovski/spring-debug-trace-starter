@@ -33,7 +33,7 @@ A backend developer adds the starter as a Maven (or Gradle) dependency to an exi
 
 1. **Given** a Spring Boot 3 app with the starter installed and `enabled=true` plus a base-package matching the app, **When** an HTTP request triggers a controller that calls a service that calls a downstream service, **Then** the developer sees three nested entry lines and three nested exit lines with duration on each exit.
 2. **Given** the same setup but `enabled=false`, **When** any request runs, **Then** no method-chain log lines from the library appear and the application behaves identically to a baseline without the library.
-3. **Given** the starter is installed but `base-packages` is empty, **When** any request runs, **Then** no method-chain logs are emitted (the developer must opt in by naming their packages).
+3. **Given** the starter is installed but `base-packages` is empty, **When** any request runs, **Then** no method-chain logs are emitted (the developer must opt in by naming their packages). The library MUST also emit exactly one `WARN` line at application startup naming this combination, so the developer who flipped `enabled=true` but forgot `base-packages` is not left wondering why nothing appears.
 4. **Given** a class in an excluded package (e.g., a Spring framework class, or the library's own package), **When** it is invoked, **Then** no log line is emitted for it — preventing recursive self-logging and framework noise.
 
 ---
@@ -137,7 +137,7 @@ The developer can switch the library into "slow-only" mode so only methods that 
 **Acceptance Scenarios**:
 
 1. **Given** slow-only mode is enabled with a 100ms threshold and exception logging is enabled, **When** a method completes in 10ms, **Then** no log line appears for it; **When** another method completes in 250ms, **Then** an exit line appears with its duration; **When** any method throws, **Then** the exception line still appears regardless of duration.
-2. **Given** the configured class-name pattern list excludes classes ending in `Configuration` and `Properties`, **When** an excluded class's method runs, **Then** no log line is emitted for it.
+2. **Given** the class-name pattern list excludes classes ending in `Configuration` and `Properties` — which is the out-of-the-box default; user-supplied patterns APPEND to it and do not replace it — **When** an excluded class's method runs, **Then** no log line is emitted for it. (An adopter who *wants* to see their `@ConfigurationProperties` beans in the chain must override the list explicitly.)
 3. **Given** the repository toggle is set to exclude repositories, **When** a repository-pattern bean is invoked, **Then** it is not logged while service-tier beans still are.
 4. **Given** the library is `enabled=false`, **When** a benchmark runs the same method many thousands of times, **Then** the measured overhead is within a small constant factor of the baseline-without-library run.
 
@@ -260,7 +260,7 @@ The developer can switch the library into "slow-only" mode so only methods that 
 - **Async propagation**: v1 does not propagate trace-ID or call-depth context across `@Async`, `CompletableFuture`, custom executors, or message listeners. Each thread's state begins clean and ends clean.
 - **Format**: v1 emits a single pretty / human-readable log format. A structured (e.g., JSON) format is a post-v1 enhancement.
 - **Logging backend**: Output is routed through SLF4J; developers' choice of Logback or Log4j2 (via SLF4J) is supported. The library does not bundle or assume a specific backend implementation.
-- **Serializer engine**: Value serialization (method arguments, return values, DTO fields) is performed by reflective traversal of the object graph, applying masking, skip-type detection, depth/length caps, and circular-reference detection at every node. Jackson Databind is NOT a hard runtime dependency of the library; users who already pull it in for their own application code are unaffected, but it is not required for `spring-debug-trace` to function.
+- **Serializer engine**: Value serialization (method arguments, return values, DTO fields) is performed by reflective traversal of the object graph, applying masking, skip-type detection, depth/length caps, and circular-reference detection at every node. Jackson Databind is NOT a hard runtime dependency of the library — it is declared with Maven `<optional>true</optional>` so it does not propagate transitively to adopters' classpaths; users who already pull it in for their own application code are unaffected, but it is not required for `spring-debug-trace` to function and the v1 codebase does not import it.
 - **Module shape**: v1 ships as a single Maven module (artifact `io.github.cerovskimatija:spring-debug-trace-starter`). A core/starter split is deferred until project growth warrants it.
 - **Default verbosity**: Method-chain logs are emitted at the debug log level under a single dedicated logger name. Library-internal warnings (e.g., a degraded serializer path) are emitted at the warn level under the same logger.
 - **Repository inclusion**: Repository-pattern beans are included by default; developers who find their query layer too noisy can exclude them through the repository toggle.

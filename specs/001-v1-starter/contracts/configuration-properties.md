@@ -57,37 +57,17 @@ All properties bind through one `@ConfigurationProperties("spring-debug-trace")`
 | | |
 |---|---|
 | **Type** | `List<String>` (regex) |
-| **Default** | `[".*Configuration", ".*Properties"]` |
+| **Default** | `[".*Configuration", ".*Properties"]` (built-in regex defaults applied out-of-the-box; user entries APPEND, they do NOT replace — same merge semantics as `excluded-packages`) |
 | **Phase** | 7 |
 | **PRD ref** | FR-5, §10 |
-| **Behavior** | A class whose fully-qualified name matches any of these regular expressions is skipped. Evaluated after package checks but before the base-package include check. |
+| **Behavior** | A class whose fully-qualified name matches any of these regular expressions is skipped. Evaluated after package checks but before the base-package include check. The defaults silence Spring Boot configuration and properties classes — adopters who *want* to see their `@ConfigurationProperties` beans logged must override the list (and the README troubleshooting section calls this out). |
 | **Validation** | Invalid regex → ignored with a `WARN` log line at startup; the rest of the list still applies. |
 
-### `spring-debug-trace.format`
-
-| | |
-|---|---|
-| **Type** | `String` (enum-like: `pretty`) |
-| **Default** | `pretty` |
-| **Phase** | 1 |
-| **PRD ref** | FR-15, §24 decision 8 |
-| **Behavior** | v1 accepts only `pretty`. Any other value is treated as `pretty` with a `WARN` log line at startup. JSON format is post-v1 (PRD §22). |
-| **Validation** | Case-insensitive string match. |
+> v1 does not expose a `format` property. The library emits the pretty/human-readable shape from §2 of `log-format.md` only; a structured (JSON) format is a post-v1 enhancement (PRD §22) and adding the configuration key now would be scaffolding for a non-goal (Constitution Principle III).
 
 ---
 
 ## `spring-debug-trace.method.*`
-
-### `method.enabled`
-
-| | |
-|---|---|
-| **Type** | `boolean` |
-| **Default** | `true` |
-| **Phase** | 1 |
-| **PRD ref** | §10 |
-| **Behavior** | Master toggle for the method-logging aspect, separate from the global `enabled`. When `false`, no method-chain logs are emitted even if the aspect bean exists. (Practically: `enabled=true, method.enabled=false` is the rare "HTTP only" mode.) |
-| **Validation** | Standard `Boolean`. |
 
 ### `method.log-input`
 

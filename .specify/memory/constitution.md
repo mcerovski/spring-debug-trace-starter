@@ -1,12 +1,16 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: (unratified template) → 1.0.0
-Rationale: Initial ratification. The prior file contained only template
-placeholders, so this is a from-zero adoption of seven core principles plus
-governance. MAJOR bump because this is the first concrete version.
+Version change: 1.0.0 → 1.0.1
+Rationale: PATCH clarification. Technical Standards & Build Baseline
+previously listed `jackson-databind` under "Direct dependencies (compile
+scope)", which contradicted spec.md Assumption §263 ("Jackson Databind is
+NOT a hard runtime dependency"). This edit moves the dependency under
+"Optional (provided/optional scope)" to make the constitution and the spec
+consistent. No principle is added, removed, or reversed; no fixed
+identifier in Principle IV changes — hence PATCH, not MINOR or MAJOR.
 
-Principles defined:
+Principles unchanged (1.0.0):
   I.   Safety First — Never Break the User Application (NON-NEGOTIABLE)
   II.  Safe-By-Default Configuration
   III. Phase-Gated, PRD-Anchored Scope
@@ -15,29 +19,27 @@ Principles defined:
   VI.  Test Discipline — JUnit 5 Unit + Spring Integration Coverage Per Phase
   VII. Idiomatic Spring Boot Conventions
 
-Added sections:
-  - Technical Standards & Build Baseline
-  - Development Workflow & Quality Gates
-  - Governance
-
-Removed sections: none (template was empty).
+Sections changed in 1.0.1:
+  - Technical Standards & Build Baseline — Jackson moved compile → optional.
 
 Templates requiring updates:
-  - .specify/templates/plan-template.md      ✅ compatible (Constitution Check
-    section is generic and will resolve to the principles above; no edits
-    needed at ratification time)
-  - .specify/templates/spec-template.md      ✅ compatible
-  - .specify/templates/tasks-template.md     ✅ compatible (phase ordering
-    here aligns with PRD-phases.md; tasks template's optional-tests note
-    does NOT override Principle VI for this project — per Principle VI,
-    tests are mandatory and tasks files MUST include them)
-  - CLAUDE.md                                ✅ no edits required; CLAUDE.md
-    already encodes the same invariants and is referenced from Governance
-  - README.md                                ✅ no edits required at
-    ratification; future amendments to Principle IV (identifiers) MUST
-    propagate here
+  - .specify/templates/*                     ✅ unaffected (no principle
+    or identifier change)
+  - CLAUDE.md                                ✅ unaffected
+  - README.md                                ✅ unaffected
+  - specs/001-v1-starter/plan.md             ✅ updated alongside (Jackson
+    moved to optional in "Primary Dependencies")
+  - specs/001-v1-starter/research.md         ✅ updated alongside (R3
+    narrative reconciled — Jackson optional, regex masking confirmed)
+  - specs/001-v1-starter/spec.md             ✅ updated alongside
+    (Assumption §263 wording clarified — Jackson is optional-scope)
+  - specs/001-v1-starter/tasks.md            ✅ updated alongside
+    (T001 declares jackson-databind optional, not compile)
 
 Deferred items: none.
+
+Prior versions:
+  1.0.0 (2026-05-28) — initial ratification.
 -->
 
 # Spring Debug Trace Starter Constitution
@@ -223,8 +225,12 @@ Compose setup).
 - **Spring Boot:** managed via `spring-boot-dependencies` BOM at the latest
   3.x at time of release. Spring Boot 2.x is NOT supported.
 - **Direct dependencies (compile scope):** `spring-boot-starter-aop`,
-  `spring-boot-autoconfigure`, `slf4j-api`, `jackson-databind`. `spring-web`
-  is `optional` — used only when present.
+  `spring-boot-autoconfigure`, `slf4j-api`. `spring-web` and
+  `jackson-databind` are declared `<optional>true</optional>` — present at
+  build time but NOT propagated transitively to adopters. `jackson-databind`
+  is optional because spec.md Assumption §263 requires it not be a hard
+  runtime dependency; v1 does not import it anywhere (Phase 6 body masking
+  uses regex per R5).
 - **Build dependencies (provided/optional scope):**
   `spring-boot-configuration-processor` (annotation processor for IDE
   metadata).
@@ -315,4 +321,4 @@ Runtime contributor guidance for AI-assisted work lives in
 those documents diverge, this constitution governs and the other documents
 MUST be reconciled.
 
-**Version**: 1.0.0 | **Ratified**: 2026-05-28 | **Last Amended**: 2026-05-28
+**Version**: 1.0.1 | **Ratified**: 2026-05-28 | **Last Amended**: 2026-05-28
